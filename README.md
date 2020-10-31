@@ -50,12 +50,12 @@ poetry run bump2version <part>
 ## Running nox sessions
 In order to bootstrap dependencies and run several actions, we are using [nox](https://nox.thea.codes/en/stable/). This way, dependencies are isolated and you get environment replicability.
 
-To run all sessions,  
+To run all sessions,
 ```bash
 nox
 ```
 
-To run tests session,  
+To run tests session,
 ```bash
 nox --sessions tests [-- pylint arguments]
 ```
@@ -65,7 +65,7 @@ To run linting session,
 nox --sessions cop
 ```
 
-To run bandit session,  
+To run bandit session,
 ```bash
 nox --sessions bandit
 ```

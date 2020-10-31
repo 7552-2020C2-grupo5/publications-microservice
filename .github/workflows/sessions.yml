@@ -40,4 +40,4 @@ jobs:
       run: nox --sessions bandit
 
 
-     
+

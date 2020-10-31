@@ -37,7 +37,7 @@ repos:
       name: pylint
       entry: poetry run pylint
       language: system
-      types: [python]   
+      types: [python]
       args: [--load-plugins, pylint_flask_sqlalchemy]
       exclude: publications_microservice/migrations|docs
 -   repo: local
