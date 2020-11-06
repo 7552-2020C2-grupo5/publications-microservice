@@ -109,7 +109,7 @@ First make sure you have the db up to date, and then run locally.
 
 ```bash
 poetry run python publications_microservice/manage.py db upgrade
-FLASK_APP=publications_microservice/app.py poetry run flask run
+FLASK_APP=$(pwd)/publications_microservice/app.py poetry run flask run
 ```
 
 # Deploy to heroku

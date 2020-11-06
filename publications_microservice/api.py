@@ -15,7 +15,16 @@ api = Api(
     description="Publications microservice for bookbnb",
     default="Publications",
     default_label="Publications operations",
+    validate=True,
 )
+
+
+@api.errorhandler
+def handle_exception(error: Exception):
+    """When an unhandled exception is raised"""
+    message = "Error: " + getattr(error, 'message', str(error))
+    return {'message': message}, getattr(error, 'code', 500)
+
 
 publication_model = api.model(
     'Publication',
@@ -56,7 +65,7 @@ class PublicationListResource(Resource):
         return Publication.query.all()
 
     @api.doc('create_publication')
-    @api.expect(publication_model, validate=True)
+    @api.expect(publication_model)
     @api.marshal_with(publication_model, envelope='resource')
     def post(self):
         """Create a new publication."""
