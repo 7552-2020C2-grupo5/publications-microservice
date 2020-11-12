@@ -4,10 +4,11 @@
 class FilterParam:
     """Filter a query based on an op and param"""
 
-    def __init__(self, name, op):
+    def __init__(self, name, op, _in="query", schema="int"):
         self.name = name
         self.op = op
         self.val = None
+        self.__schema__ = {"name": name, "in": _in, "type": schema}
 
     def __call__(self, val):
         self.val = val
