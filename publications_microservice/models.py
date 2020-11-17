@@ -9,6 +9,7 @@ class Publication(db.Model):  # type: ignore
     """Publications model."""
 
     id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
     title = db.Column(db.String)
     description = db.Column(db.String)
     rooms = db.Column(
