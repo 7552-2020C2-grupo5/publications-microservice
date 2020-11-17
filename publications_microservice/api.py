@@ -29,6 +29,7 @@ publication_model = api.model(
         "id": fields.Integer(
             readonly=True, description="The unique identifier of the publication"
         ),
+        "user_id": fields.Integer(readonly=True, description="Id of owner user"),
         "title": fields.String(
             required=True, description="The title of the publication."
         ),
@@ -76,6 +77,12 @@ publication_parser.add_argument(
     "price_per_night",
     type=FilterParam("price_per_night", ops.le),
     help="max price per night",
+    store_missing=False,
+)
+publication_parser.add_argument(
+    "user_id",
+    type=FilterParam("user_id", ops.eq),
+    help="id of owner user",
     store_missing=False,
 )
 
