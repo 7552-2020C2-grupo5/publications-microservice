@@ -23,6 +23,14 @@ def handle_exception(error: Exception):
     return {'message': message}, getattr(error, 'code', 500)
 
 
+loc_model = api.model(
+    "Location",
+    {
+        "latitude": fields.Float(description="latitude", required=True),
+        "longitude": fields.Float(description="longitude", required=True),
+    },
+)
+
 publication_model = api.model(
     'Publication',
     {
@@ -49,6 +57,9 @@ publication_model = api.model(
         ),
         "price_per_night": fields.Float(
             required=True, description="How much a night costs in the rental place"
+        ),
+        "loc": fields.Nested(
+            loc_model, required=True, description="Location of the rental place"
         ),
     },
 )

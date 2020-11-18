@@ -1,7 +1,7 @@
 version: '3.7'
 services:
     postgres:
-        image: postgres:11.9
+        image: postgis/postgis:11-2.5-alpine
         environment:
           - POSTGRES_USER=publications_microservice
           - POSTGRES_PASSWORD=publications_microservice
