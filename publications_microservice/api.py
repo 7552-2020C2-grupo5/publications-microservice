@@ -3,7 +3,9 @@ from publications_microservice import __version__
 from flask_restx import Api, Resource, fields, reqparse
 from publications_microservice.models import Publication, db
 import operator as ops
+from sqlalchemy import func
 from .utils import FilterParam
+
 
 api = Api(
     prefix="/v1",
@@ -31,8 +33,16 @@ loc_model = api.model(
     },
 )
 
-publication_model = api.model(
-    'Publication',
+point_model = api.model(
+    "Point",
+    {
+        "latitude": fields.Float(attribute=lambda x: db.session.scalar(func.ST_X(x))),
+        "longitude": fields.Float(attribute=lambda x: db.session.scalar(func.ST_Y(x))),
+    },
+)
+
+base_publication_model = api.model(
+    'Base Publication',
     {
         "id": fields.Integer(
             readonly=True, description="The unique identifier of the publication"
@@ -58,10 +68,22 @@ publication_model = api.model(
         "price_per_night": fields.Float(
             required=True, description="How much a night costs in the rental place"
         ),
+    },
+)
+
+new_publication_model = api.inherit(
+    "New Publication Model",
+    base_publication_model,
+    {
         "loc": fields.Nested(
-            loc_model, required=True, description="Location of the rental place"
+            loc_model, required=True, description="Location of the rental place",
         ),
     },
+)
+
+
+publication_model = api.inherit(
+    'Created Publication', base_publication_model, {"loc": fields.Nested(point_model)},
 )
 
 
@@ -96,6 +118,24 @@ publication_parser.add_argument(
     help="id of owner user",
     store_missing=False,
 )
+publication_parser.add_argument(
+    "latitude",
+    type=float,
+    help="The latitude for the point near to look for. Note: max_distance and longitude are required when using latitude.",
+    store_missing=True,
+)
+publication_parser.add_argument(
+    "longitude",
+    type=float,
+    help="The longitude for the point near to look for. Note: max_distance and latitude are required when using longitude.",
+    store_missing=True,
+)
+publication_parser.add_argument(
+    "max_distance",
+    type=float,
+    help="The maximum distance (in km.) for the point near to look for. Note: latitude and longitude are required when using max_distance.",
+    store_missing=True,
+)
 
 
 @api.route('/publication')
@@ -106,30 +146,60 @@ class PublicationListResource(Resource):
     def get(self):
         """Get all publications."""
         params = publication_parser.parse_args()
-        api.app.logger.info("%s params", params)
+        if params.max_distance is not None:
+            has_lat_and_lon = (
+                params.latitude is not None and params.longitude is not None
+            )
+            if not has_lat_and_lon:
+                raise ValueError(
+                    "max_distance, longitude and latitude should either all be passed or none"
+                )
         query = Publication.query
         for _, filter_op in params.items():
+            if not isinstance(filter_op, FilterParam):
+                continue
             query = filter_op.apply(query, Publication)
+        if params.max_distance:
+            point = func.ST_GeographyFromText(
+                f"POINT({params.latitude} {params.longitude})", srid=4326
+            )
+
+            query = query.filter(
+                func.ST_DWithin(Publication.loc, point, params.max_distance * 1000)
+            )
         return query.all()
 
+
+@api.route('/user/<int:user_id>/publication')
+@api.param('user_id', 'The user the new publication belongs to')
+class CreatePublicationResource(Resource):
     @api.doc('create_publication')
-    @api.expect(publication_model)
+    @api.expect(new_publication_model)
     @api.marshal_with(publication_model)
-    def post(self):
+    def post(self, user_id):
         """Create a new publication."""
-        new_publication = Publication(**api.payload)
+        data = api.payload
+        # TODO: it'd be cool to marshal this on the model
+        data['loc'] = f"POINT({data['loc']['latitude']} {data['loc']['longitude']})"
+        data['user_id'] = user_id
+        new_publication = Publication(**data)
         db.session.add(new_publication)
         db.session.commit()
         return new_publication
 
+    @api.doc("list_user_publications")
+    @api.marshal_list_with(publication_model)
+    def get(self, user_id):
+        """Get all publications from a user."""
+        return Publication.query.filter(Publication.user_id == user_id).all()
+
 
 @api.route('/publication/<int:publication_id>')
-@api.param('Publication_id', 'The publication unique identifier')
+@api.param('publication_id', 'The publication unique identifier')
 @api.response(404, 'Publication not found')
 class PublicationResource(Resource):
     @api.doc('get_publication')
     @api.marshal_with(publication_model)
     def get(self, publication_id):
         """Get a publication by id."""
-        publication = Publication.query.filter(Publication.id == publication_id).first()
-        return publication
+        return Publication.query.filter(Publication.id == publication_id).first()
