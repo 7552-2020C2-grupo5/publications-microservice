@@ -5,7 +5,6 @@ from flask import Flask
 from flask_migrate import Migrate
 from flask_cors import CORS
 
-
 from publications_microservice.api import api
 from publications_microservice.cfg import config
 from publications_microservice.models import db

@@ -1,6 +1,6 @@
 """SQLAlchemy models."""
 from flask_sqlalchemy import SQLAlchemy
-
+from geoalchemy2.types import Geography
 
 db = SQLAlchemy()
 
@@ -25,3 +25,4 @@ class Publication(db.Model):  # type: ignore
         db.Numeric,
         db.CheckConstraint('price_per_night > 0', name='price_per_night_nonnegative'),
     )
+    loc = db.Column(Geography(geometry_type='POINT', srid=4326))
