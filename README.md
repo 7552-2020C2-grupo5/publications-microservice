@@ -127,7 +127,7 @@ Prior to the actual deploy, **make sure to commit your changes**.
 ```bash
 heroku create publications_microservice
 heroku addons:create heroku-postgresql:hobby-dev
-heroku create extension postgis
+heroku pg:psql -c "create extension postgis;"
 heroku stack:set container
 git push heroku master
 ```
