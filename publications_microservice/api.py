@@ -1,11 +1,11 @@
 """API module."""
 from publications_microservice import __version__
-from flask_restx import Api, Resource, fields, reqparse
+from flask_restx import Api, Resource, fields, reqparse, abort
 from publications_microservice.models import Publication, db
 import operator as ops
 from sqlalchemy import func
 from .utils import FilterParam
-
+from publications_microservice.exceptions import DistanceFilterMissingParameters
 
 api = Api(
     prefix="/v1",
@@ -18,11 +18,20 @@ api = Api(
 )
 
 
+@api.errorhandler(DistanceFilterMissingParameters)
+def handle_user_does_not_exist(_error: DistanceFilterMissingParameters):
+    """Handle missing distance params."""
+    abort(
+        400,
+        "Either all of max_distance, latitude and longitude should be passed to perform distance based filtering or none of them",
+    )
+
+
 @api.errorhandler
 def handle_exception(error: Exception):
     """When an unhandled exception is raised"""
     message = "Error: " + getattr(error, 'message', str(error))
-    return {'message': message}, getattr(error, 'code', 500)
+    abort(getattr(error, 'code', 500), message)
 
 
 loc_model = api.model(
@@ -151,9 +160,7 @@ class PublicationListResource(Resource):
                 params.latitude is not None and params.longitude is not None
             )
             if not has_lat_and_lon:
-                raise ValueError(
-                    "max_distance, longitude and latitude should either all be passed or none"
-                )
+                raise DistanceFilterMissingParameters
         query = Publication.query
         for _, filter_op in params.items():
             if not isinstance(filter_op, FilterParam):
