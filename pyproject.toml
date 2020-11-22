@@ -24,6 +24,7 @@ pylint-flask = "^0.6"
 pylint-flask-sqlalchemy = "^0.2.0"
 Flask-Cors = "^3.0.9"
 GeoAlchemy2 = "^0.8.4"
+Shapely = "^1.7.1"
 
 [tool.poetry.dev-dependencies]
 nox = "^2020.8.22"
