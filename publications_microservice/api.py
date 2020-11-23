@@ -1,6 +1,6 @@
 """API module."""
 from publications_microservice import __version__
-from flask_restx import Api, Resource, fields, reqparse, abort
+from flask_restx import Api, Resource, fields, reqparse
 from publications_microservice.models import Publication, db
 import operator as ops
 from sqlalchemy import func
@@ -21,17 +21,19 @@ api = Api(
 @api.errorhandler(DistanceFilterMissingParameters)
 def handle_user_does_not_exist(_error: DistanceFilterMissingParameters):
     """Handle missing distance params."""
-    abort(
+    return (
+        {
+            "message": "Either all of max_distance, latitude and longitude should be passed to perform distance based filtering or none of them"
+        },
         400,
-        "Either all of max_distance, latitude and longitude should be passed to perform distance based filtering or none of them",
     )
 
 
 @api.errorhandler
 def handle_exception(error: Exception):
     """When an unhandled exception is raised"""
-    message = "Error: " + getattr(error, 'message', str(error))
-    abort(getattr(error, 'code', 500), message)
+    message = f"Error: {getattr(error, 'message', str(error))}"
+    return {"message": message}, getattr(error, 'code', 500)
 
 
 loc_model = api.model(
