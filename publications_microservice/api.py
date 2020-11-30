@@ -149,7 +149,7 @@ publication_parser.add_argument(
 )
 
 
-@api.route('/publication')
+@api.route('/publications')
 class PublicationListResource(Resource):
     @api.doc('list_publication')
     @api.marshal_list_with(publication_model)
@@ -179,7 +179,7 @@ class PublicationListResource(Resource):
         return query.all()
 
 
-@api.route('/user/<int:user_id>/publication')
+@api.route('/users/<int:user_id>/publications')
 @api.param('user_id', 'The user the new publication belongs to')
 class CreatePublicationResource(Resource):
     @api.doc('create_publication')
@@ -203,7 +203,7 @@ class CreatePublicationResource(Resource):
         return Publication.query.filter(Publication.user_id == user_id).all()
 
 
-@api.route('/publication/<int:publication_id>')
+@api.route('/publications/<int:publication_id>')
 @api.param('publication_id', 'The publication unique identifier')
 @api.response(404, 'Publication not found')
 class PublicationResource(Resource):
