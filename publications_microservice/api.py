@@ -94,7 +94,12 @@ new_publication_model = api.inherit(
 
 
 publication_model = api.inherit(
-    'Created Publication', base_publication_model, {"loc": fields.Nested(point_model)},
+    'Created Publication',
+    base_publication_model,
+    {
+        "loc": fields.Nested(point_model),
+        "registered_date": fields.DateTime(description="Date of the publication"),
+    },
 )
 
 
