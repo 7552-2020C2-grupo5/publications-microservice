@@ -101,7 +101,7 @@ publication_model = api.inherit(
     base_publication_model,
     {
         "loc": fields.Nested(point_model),
-        "registered_date": fields.DateTime(description="Date of the publication"),
+        "publication_date": fields.DateTime(description="Date of the publication"),
     },
 )
 
@@ -202,10 +202,30 @@ class PublicationsResource(Resource):
 
 @api.route('/publications/<int:publication_id>')
 @api.param('publication_id', 'The publication unique identifier')
-@api.response(404, 'Publication not found')
 class PublicationResource(Resource):
     @api.doc('get_publication')
-    @api.marshal_with(publication_model)
+    @api.response(200, "Publication found", model=publication_model)
+    @api.response(404, 'Publication not found')
     def get(self, publication_id):
         """Get a publication by id."""
-        return Publication.query.filter(Publication.id == publication_id).first()
+        publication = Publication.query.filter(Publication.id == publication_id).first()
+        if publication is None:
+            return {"message": "No publication was found by that id."}, 404
+        return api.marshal(publication, publication_model), 200
+
+    @api.doc("put_publication")
+    @api.response(200, "Publication found", model=publication_model)
+    @api.response(404, 'Publication not found')
+    @api.expect(new_publication_model)
+    def put(self, publication_id):
+        """Replace a publication by id."""
+        publication = Publication.query.filter(Publication.id == publication_id).first()
+        if publication is None:
+            return {"message": "No publication was found by that id."}, 404
+        data = api.payload
+        # TODO: it'd be cool to marshal this on the model
+        data['loc'] = f"POINT({data['loc']['latitude']} {data['loc']['longitude']})"
+        publication.update_from_dict(**data)
+        db.session.merge(publication)
+        db.session.commit()
+        return api.marshal(publication, publication_model), 200

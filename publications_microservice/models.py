@@ -28,3 +28,7 @@ class Publication(db.Model):  # type: ignore
     )
     loc = db.Column(Geography(geometry_type='POINT', srid=4326))
     publication_date = db.Column(db.DateTime, nullable=False, default=func.now())
+
+    def update_from_dict(self, **kwargs):
+        for field, value in kwargs.items():
+            setattr(self, field, value)
