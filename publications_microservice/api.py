@@ -86,6 +86,9 @@ new_publication_model = api.inherit(
     "New Publication Model",
     base_publication_model,
     {
+        "user_id": fields.Integer(
+            required=True, description="The user the new publication belongs to"
+        ),
         "loc": fields.Nested(
             loc_model, required=True, description="Location of the rental place",
         ),
@@ -155,7 +158,20 @@ publication_parser.add_argument(
 
 
 @api.route('/publications')
-class PublicationListResource(Resource):
+class PublicationsResource(Resource):
+    @api.doc('create_publication')
+    @api.expect(new_publication_model)
+    @api.marshal_with(publication_model)
+    def post(self):
+        """Create a new publication."""
+        data = api.payload
+        # TODO: it'd be cool to marshal this on the model
+        data['loc'] = f"POINT({data['loc']['latitude']} {data['loc']['longitude']})"
+        new_publication = Publication(**data)
+        db.session.add(new_publication)
+        db.session.commit()
+        return new_publication
+
     @api.doc('list_publication')
     @api.marshal_list_with(publication_model)
     @api.expect(publication_parser)
@@ -182,30 +198,6 @@ class PublicationListResource(Resource):
                 func.ST_DWithin(Publication.loc, point, params.max_distance * 1000)
             )
         return query.all()
-
-
-@api.route('/users/<int:user_id>/publications')
-@api.param('user_id', 'The user the new publication belongs to')
-class CreatePublicationResource(Resource):
-    @api.doc('create_publication')
-    @api.expect(new_publication_model)
-    @api.marshal_with(publication_model)
-    def post(self, user_id):
-        """Create a new publication."""
-        data = api.payload
-        # TODO: it'd be cool to marshal this on the model
-        data['loc'] = f"POINT({data['loc']['latitude']} {data['loc']['longitude']})"
-        data['user_id'] = user_id
-        new_publication = Publication(**data)
-        db.session.add(new_publication)
-        db.session.commit()
-        return new_publication
-
-    @api.doc("list_user_publications")
-    @api.marshal_list_with(publication_model)
-    def get(self, user_id):
-        """Get all publications from a user."""
-        return Publication.query.filter(Publication.user_id == user_id).all()
 
 
 @api.route('/publications/<int:publication_id>')
