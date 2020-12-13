@@ -45,3 +45,5 @@ class PublicationImage(db.Model):  # type: ignore
     publication_id = db.Column(
         db.Integer, db.ForeignKey('publication.id'), nullable=False
     )
+
+    # TODO: validate URLs
