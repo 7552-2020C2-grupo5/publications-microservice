@@ -1,7 +1,7 @@
 """API module."""
 from publications_microservice import __version__
 from flask_restx import Api, Resource, fields, reqparse
-from publications_microservice.models import Publication, db
+from publications_microservice.models import Publication, PublicationImage, db
 import operator as ops
 from sqlalchemy import func
 from .utils import FilterParam
@@ -36,6 +36,14 @@ def handle_exception(error: Exception):
     return {"message": message}, getattr(error, 'code', 500)
 
 
+publication_image_model = api.model(
+    "Publication Image",
+    {
+        "url": fields.String(required=True, description="URL location for the image"),
+        "id": fields.String(readonly=True, description="UUID for this image"),
+    },
+)
+
 loc_model = api.model(
     "Location",
     {
@@ -58,7 +66,7 @@ base_publication_model = api.model(
         "id": fields.Integer(
             readonly=True, description="The unique identifier of the publication"
         ),
-        "user_id": fields.Integer(readonly=True, description="Id of owner user"),
+        "user_id": fields.Integer(description="Id of owner user"),
         "title": fields.String(
             required=True, description="The title of the publication."
         ),
@@ -79,6 +87,11 @@ base_publication_model = api.model(
         "price_per_night": fields.Float(
             required=True, description="How much a night costs in the rental place"
         ),
+        "images": fields.List(
+            fields.Nested(publication_image_model),
+            required=True,
+            description="List of images URLs",
+        ),
     },
 )
 
@@ -86,9 +99,6 @@ new_publication_model = api.inherit(
     "New Publication Model",
     base_publication_model,
     {
-        "user_id": fields.Integer(
-            required=True, description="The user the new publication belongs to"
-        ),
         "loc": fields.Nested(
             loc_model, required=True, description="Location of the rental place",
         ),
@@ -104,7 +114,6 @@ publication_model = api.inherit(
         "publication_date": fields.DateTime(description="Date of the publication"),
     },
 )
-
 
 publication_parser = reqparse.RequestParser()
 publication_parser.add_argument(
@@ -167,6 +176,14 @@ class PublicationsResource(Resource):
         data = api.payload
         # TODO: it'd be cool to marshal this on the model
         data['loc'] = f"POINT({data['loc']['latitude']} {data['loc']['longitude']})"
+
+        images = []
+        for img_data in data["images"]:
+            new_img = PublicationImage(**img_data)
+            images.append(new_img)
+            db.session.add(new_img)
+        data["images"] = images
+
         new_publication = Publication(**data)
         db.session.add(new_publication)
         db.session.commit()
