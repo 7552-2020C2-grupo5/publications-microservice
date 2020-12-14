@@ -4,7 +4,7 @@ from flask_restx import Resource, fields, reqparse, Namespace
 from publications_microservice.models import Publication, PublicationImage, db
 import operator as ops
 from sqlalchemy import func
-from .utils import FilterParam
+from publications_microservice.utils import FilterParam
 from publications_microservice.exceptions import DistanceFilterMissingParameters
 
 api = Namespace("Publications", description="Publications operations")
@@ -158,7 +158,7 @@ publication_parser.add_argument(
 )
 
 
-@api.route('/publications')
+@api.route('/')
 class PublicationsResource(Resource):
     @api.doc('create_publication')
     @api.expect(new_publication_model)
@@ -209,7 +209,7 @@ class PublicationsResource(Resource):
         return query.all()
 
 
-@api.route('/publications/<int:publication_id>')
+@api.route('/<int:publication_id>')
 @api.param('publication_id', 'The publication unique identifier')
 class PublicationResource(Resource):
     @api.doc('get_publication')

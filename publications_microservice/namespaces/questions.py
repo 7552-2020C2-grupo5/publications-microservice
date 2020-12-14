@@ -5,7 +5,7 @@ from flask_restx import Resource, Namespace
 api = Namespace("Questions", description="Publication questions operations")
 
 
-@api.route("/questions")
+@api.route("/")
 class PublicationQuestionListResource(Resource):
     def post(self):
         pass
@@ -14,7 +14,7 @@ class PublicationQuestionListResource(Resource):
         pass
 
 
-@api.route("/questions/<int:question_id>")
+@api.route("/<int:question_id>")
 class PublicationResource(Resource):
     def get(self, question_id):
         pass

@@ -5,7 +5,7 @@ from publications_microservice import __version__
 from publications_microservice.namespaces.publications import (
     api as publications_namespace,
 )
-from reviews_microservice.namespaces.questions import api as questions_namespace
+from publications_microservice.namespaces.questions import api as questions_namespace
 
 
 api = Api(
@@ -18,8 +18,8 @@ api = Api(
     validate=True,
 )
 
-api.add_namespace(publications_namespace)
-api.add_namespace(questions_namespace)
+api.add_namespace(publications_namespace, path='/publications')
+api.add_namespace(questions_namespace, path='/questions')
 
 
 @api.errorhandler
