@@ -53,6 +53,6 @@ class PublicationQuestion(db.Model):  # type: ignore
     """Public questions for publications."""
 
     id = db.Column(db.Integer, primary_key=True)
-    question = db.String(db.String, nullable=False)
+    question = db.Column(db.String, nullable=False)
     reply = db.Column(db.String, nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=func.now())
