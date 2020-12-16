@@ -6,6 +6,7 @@ import operator as ops
 from sqlalchemy import func
 from publications_microservice.utils import FilterParam
 from publications_microservice.exceptions import DistanceFilterMissingParameters
+from publications_microservice.namespaces.questions import publication_question_model
 
 api = Namespace("Publications", description="Publications operations")
 
@@ -104,6 +105,10 @@ publication_model = api.inherit(
     {
         "loc": fields.Nested(point_model),
         "publication_date": fields.DateTime(description="Date of the publication"),
+        "questions": fields.List(
+            fields.Nested(publication_question_model),
+            description="Questions regarding the publication",
+        ),
     },
 )
 
@@ -158,7 +163,7 @@ publication_parser.add_argument(
 )
 
 
-@api.route('/')
+@api.route('')
 class PublicationsResource(Resource):
     @api.doc('create_publication')
     @api.expect(new_publication_model)

@@ -19,7 +19,7 @@ api = Api(
 )
 
 api.add_namespace(publications_namespace, path='/publications')
-api.add_namespace(questions_namespace, path='/questions')
+api.add_namespace(questions_namespace, path='/publications')
 
 
 @api.errorhandler
