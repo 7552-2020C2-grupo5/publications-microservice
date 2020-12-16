@@ -8,7 +8,14 @@ api = Namespace("Questions", description="Publication questions operations")
 
 new_publication_question_model = api.model(
     "New Publication Question",
-    {"question": fields.String(description="The question being asked", required=True)},
+    {
+        "question": fields.String(
+            description="The question being asked", required=True
+        ),
+        "user_id": fields.Integer(
+            description="The user asking the question", required=True
+        ),
+    },
 )
 
 publication_question_model = api.clone(
