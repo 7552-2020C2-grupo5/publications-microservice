@@ -59,6 +59,7 @@ class PublicationQuestion(db.Model):  # type: ignore
     reply = db.Column(db.String, nullable=True)
     created_at = db.Column(db.DateTime, nullable=False, default=func.now())
     replied_at = db.Column(db.DateTime, nullable=True)
+    user_id = db.Column(db.Integer, nullable=False)
     publication_id = db.Column(
         db.Integer, db.ForeignKey('publication.id'), nullable=False
     )
