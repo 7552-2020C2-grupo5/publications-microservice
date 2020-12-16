@@ -1,12 +1,14 @@
 """API module."""
-from publications_microservice import __version__
-from flask_restx import Resource, fields, reqparse, Namespace
-from publications_microservice.models import Publication, PublicationImage, db
 import operator as ops
+
+from flask_restx import Namespace, Resource, fields, reqparse
 from sqlalchemy import func
-from publications_microservice.utils import FilterParam
+
+from publications_microservice import __version__
 from publications_microservice.exceptions import DistanceFilterMissingParameters
+from publications_microservice.models import Publication, PublicationImage, db
 from publications_microservice.namespaces.questions import publication_question_model
+from publications_microservice.utils import FilterParam
 
 api = Namespace("Publications", description="Publications operations")
 

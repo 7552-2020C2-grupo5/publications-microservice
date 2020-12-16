@@ -1,9 +1,10 @@
 """SQLAlchemy models."""
+from uuid import uuid4
+
 from flask_sqlalchemy import SQLAlchemy
 from geoalchemy2.types import Geography
 from sqlalchemy.sql import func
 from sqlalchemy_utils import UUIDType
-from uuid import uuid4
 
 db = SQLAlchemy()
 

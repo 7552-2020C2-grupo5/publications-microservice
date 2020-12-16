@@ -1,8 +1,10 @@
 """API module."""
-from publications_microservice import __version__
-from flask_restx import Resource, Namespace, fields
-from publications_microservice.models import PublicationQuestion, db
 from datetime import datetime as dt
+
+from flask_restx import Namespace, Resource, fields
+
+from publications_microservice import __version__
+from publications_microservice.models import PublicationQuestion, db
 
 api = Namespace("Questions", description="Publication questions operations")
 
