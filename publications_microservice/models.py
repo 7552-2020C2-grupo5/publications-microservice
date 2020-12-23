@@ -31,6 +31,7 @@ class Publication(db.Model):  # type: ignore
     )
     loc = db.Column(Geography(geometry_type='POINT', srid=4326))
     publication_date = db.Column(db.DateTime, nullable=False, default=func.now())
+    blocked = db.Column(db.Boolean, default=False)
 
     images = db.relationship("PublicationImage", backref="publication", lazy=True)
     questions = db.relationship("PublicationQuestion", backref="publication", lazy=True)
