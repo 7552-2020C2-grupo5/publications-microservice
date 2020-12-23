@@ -237,6 +237,8 @@ class PublicationResource(Resource):
         publication = Publication.query.filter(Publication.id == publication_id).first()
         if publication is None:
             return {"message": "No publication was found by that id."}, 404
+        if publication.blocked:
+            raise BlockedPublication
         return api.marshal(publication, publication_model), 200
 
     @api.doc("put_publication")
@@ -248,6 +250,8 @@ class PublicationResource(Resource):
         publication = Publication.query.filter(Publication.id == publication_id).first()
         if publication is None:
             return {"message": "No publication was found by that id."}, 404
+        if publication.blocked:
+            raise BlockedPublication
         data = api.payload
         # TODO: it'd be cool to marshal this on the model
         data['loc'] = f"POINT({data['loc']['latitude']} {data['loc']['longitude']})"
@@ -255,3 +259,17 @@ class PublicationResource(Resource):
         db.session.merge(publication)
         db.session.commit()
         return api.marshal(publication, publication_model), 200
+
+    @api.doc("block_publication")
+    @api.response(200, "Publication successfully blocked")
+    def delete(self, publication_id):
+        """Block a publication."""
+        publication = Publication.query.filter(Publication.id == publication_id).first()
+        if publication is None:
+            return {"message": "No publication was found by that id."}, 404
+        if publication.blocked:
+            raise BlockedPublication
+        publication.blocked = True
+        db.session.merge(publication)
+        db.session.commit()
+        return {"message": "Publication was successfully blocked"}, 200
