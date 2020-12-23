@@ -3,3 +3,7 @@
 
 class DistanceFilterMissingParameters(Exception):
     pass
+
+
+class BlockedPublication(Exception):
+    pass

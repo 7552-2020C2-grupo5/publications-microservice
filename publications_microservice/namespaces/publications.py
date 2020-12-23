@@ -5,7 +5,10 @@ from flask_restx import Namespace, Resource, fields, reqparse
 from sqlalchemy import func
 
 from publications_microservice import __version__
-from publications_microservice.exceptions import DistanceFilterMissingParameters
+from publications_microservice.exceptions import (
+    BlockedPublication,
+    DistanceFilterMissingParameters,
+)
 from publications_microservice.models import Publication, PublicationImage, db
 from publications_microservice.namespaces.questions import publication_question_model
 from publications_microservice.utils import FilterParam
@@ -14,7 +17,7 @@ api = Namespace("Publications", description="Publications operations")
 
 
 @api.errorhandler(DistanceFilterMissingParameters)
-def handle_user_does_not_exist(_error: DistanceFilterMissingParameters):
+def handle_missing_distance_parameters(_error: DistanceFilterMissingParameters):
     """Handle missing distance params."""
     return (
         {
@@ -22,6 +25,12 @@ def handle_user_does_not_exist(_error: DistanceFilterMissingParameters):
         },
         400,
     )
+
+
+@api.errorhandler(BlockedPublication)
+def handle_publication_has_been_blocked(_error: BlockedPublication):
+    """Handle blocked user."""
+    return {"message": "The publication has been blocked"}, 403
 
 
 @api.errorhandler
@@ -200,7 +209,7 @@ class PublicationsResource(Resource):
             )
             if not has_lat_and_lon:
                 raise DistanceFilterMissingParameters
-        query = Publication.query
+        query = Publication.query.filter(Publication.blocked == False)  # noqa: E712
         for _, filter_op in params.items():
             if not isinstance(filter_op, FilterParam):
                 continue
@@ -218,6 +227,7 @@ class PublicationsResource(Resource):
 
 @api.route('/<int:publication_id>')
 @api.param('publication_id', 'The publication unique identifier')
+@api.response(403, "Publication has been blocked")
 class PublicationResource(Resource):
     @api.doc('get_publication')
     @api.response(200, "Publication found", model=publication_model)
