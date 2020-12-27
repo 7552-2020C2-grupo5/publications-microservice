@@ -39,7 +39,6 @@ def handle_exception(error: Exception):
     message = f"Error: {getattr(error, 'message', str(error))}"
     return {"message": message}, getattr(error, 'code', 500)
 
-
 publication_image_model = api.model(
     "Publication Image",
     {
@@ -144,13 +143,13 @@ publication_parser.add_argument(
 )
 publication_parser.add_argument(
     "price_per_night_min",
-    type=FilterParam("price_per_night", ops.ge),
+    type=FilterParam("price_per_night_min", ops.ge, name="price_per_night"),
     help="min price per night",
     store_missing=False,
 )
 publication_parser.add_argument(
     "price_per_night_max",
-    type=FilterParam("price_per_night", ops.le),
+    type=FilterParam("price_per_night_max", ops.le, attribute="price_per_night"),
     help="max price per night",
     store_missing=False,
 )
