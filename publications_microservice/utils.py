@@ -19,7 +19,7 @@ class FilterParam:
         self.name = name
         self.op = op
         self.val = None
-        self.atribute = attribute or self.name
+        self.attribute = attribute or self.name
         self.__schema__ = {"name": name, "in": _in, "type": schema}
 
     def __call__(self, val):
