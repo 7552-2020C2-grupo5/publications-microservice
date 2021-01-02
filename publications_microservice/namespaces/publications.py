@@ -209,12 +209,12 @@ class PublicationsResource(Resource):
     def get(self):
         """Get all publications."""
         params = publication_parser.parse_args()
-        if params.max_distance is not None:
-            has_lat_and_lon = (
-                params.latitude is not None and params.longitude is not None
-            )
-            if not has_lat_and_lon:
-                raise DistanceFilterMissingParameters
+        has_lat = params.latitude is not None
+        has_lon = params.longitude is not None
+        has_dist = params.max_distance is not None
+
+        if any((has_lat, has_lon, has_dist)) and not all((has_lat, has_lon, has_dist)):
+            raise DistanceFilterMissingParameters
         query = Publication.query.filter(Publication.blocked == False)  # noqa: E712
         for _, filter_op in params.items():
             if not isinstance(filter_op, FilterParam):
