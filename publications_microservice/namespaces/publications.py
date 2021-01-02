@@ -8,8 +8,14 @@ from publications_microservice import __version__
 from publications_microservice.exceptions import (
     BlockedPublication,
     DistanceFilterMissingParameters,
+    PublicationDoesNotExist,
 )
-from publications_microservice.models import Publication, PublicationImage, db
+from publications_microservice.models import (
+    Publication,
+    PublicationImage,
+    PublicationStar,
+    db,
+)
 from publications_microservice.namespaces.questions import publication_question_model
 from publications_microservice.utils import FilterParam
 
@@ -31,6 +37,12 @@ def handle_missing_distance_parameters(_error: DistanceFilterMissingParameters):
 def handle_publication_has_been_blocked(_error: BlockedPublication):
     """Handle blocked user."""
     return {"message": "The publication has been blocked"}, 403
+
+
+@api.errorhandler(PublicationDoesNotExist)
+def handle_publication_does_not_exist(_error: PublicationDoesNotExist):
+    """Handle non-existing publication exception."""
+    return {'message': "No publication by that id was found."}, 404
 
 
 @api.errorhandler
@@ -242,7 +254,7 @@ class PublicationResource(Resource):
         """Get a publication by id."""
         publication = Publication.query.filter(Publication.id == publication_id).first()
         if publication is None:
-            return {"message": "No publication was found by that id."}, 404
+            raise PublicationDoesNotExist
         if publication.blocked:
             raise BlockedPublication
         return api.marshal(publication, publication_model), 200
@@ -255,7 +267,7 @@ class PublicationResource(Resource):
         """Replace a publication by id."""
         publication = Publication.query.filter(Publication.id == publication_id).first()
         if publication is None:
-            return {"message": "No publication was found by that id."}, 404
+            raise PublicationDoesNotExist
         if publication.blocked:
             raise BlockedPublication
 
@@ -284,10 +296,104 @@ class PublicationResource(Resource):
         """Block a publication."""
         publication = Publication.query.filter(Publication.id == publication_id).first()
         if publication is None:
-            return {"message": "No publication was found by that id."}, 404
+            raise PublicationDoesNotExist
         if publication.blocked:
             raise BlockedPublication
         publication.blocked = True
         db.session.merge(publication)
         db.session.commit()
         return {"message": "Publication was successfully blocked"}, 200
+
+
+new_star_model = api.model(
+    "Starred publication",
+    {
+        "user_id": fields.Integer(
+            description="The unique identifier for the user starring the publication"
+        ),
+        "created_at": fields.DateTime(
+            description="Time when the publication was starred"
+        ),
+        "publication_id": fields.Integer(
+            description="The unique identifier for the publication being starred"
+        ),
+    },
+)
+
+publication_star_parser = reqparse.RequestParser()
+publication_star_parser.add_argument(
+    "user_id",
+    type=FilterParam("user_id", ops.eq),
+    help="Unique identifier for the user",
+    store_missing=False,
+)
+
+publication_star_uid_parser = reqparse.RequestParser()
+publication_star_uid_parser.add_argument(
+    "user_id", type=int, help="Unique identifier for the user", required=True,
+)
+
+
+@api.route('/<int:publication_id>/star')
+@api.param('publication_id', 'The publication unique identifier')
+class PublicationStarResource(Resource):
+    @api.doc('star_publication')
+    @api.response(200, "Publication starred")
+    @api.response(403, "Publication has been blocked")
+    @api.response(404, 'Publication not found')
+    @api.expect(publication_star_uid_parser)
+    @api.marshal_with(new_star_model)
+    def post(self, publication_id):
+        """Star a publication."""
+        publication = Publication.query.filter(Publication.id == publication_id).first()
+        if publication is None:
+            raise PublicationDoesNotExist
+        if publication.blocked:
+            raise BlockedPublication
+
+        args = publication_star_uid_parser.parse_args()
+
+        new_star = PublicationStar(user_id=args.user_id, publication_id=publication_id)
+        db.session.add(new_star)
+        db.session.commit()
+
+        return new_star
+
+    @api.doc('unstar_publication')
+    @api.response(200, "Publication unstarred")
+    @api.response(400, "Bad request")
+    @api.expect(publication_star_uid_parser)
+    def delete(self, publication_id):
+        """Unstar a publication."""
+        args = publication_star_uid_parser.parse_args()
+        publication_star = PublicationStar.query.filter(
+            PublicationStar.publication_id == publication_id,
+            PublicationStar.user_id == args.user_id,
+        ).first()
+        if publication_star is None:
+            return (
+                {
+                    "message": f"Publication {publication_id} was not starred by user {args.user_id}"
+                },
+                400,
+            )
+        db.session.delete(publication_star)
+        db.session.commit()
+        return {"message": "Successfully deleted"}, 200
+
+    @api.doc('get_starrings')
+    @api.marshal_list_with(new_star_model)
+    @api.response(200, "Publications filtered")
+    @api.response(400, "Bad request")
+    @api.expect(publication_star_parser)
+    def get(self, publication_id):
+        """Get a starring."""
+        params = publication_star_parser.parse_args()
+        query = PublicationStar.query.filter(
+            PublicationStar.publication_id == publication_id,
+        )
+        for _, filter_op in params.items():
+            if not isinstance(filter_op, FilterParam):
+                continue
+            query = filter_op.apply(query, PublicationStar)
+        return query.all()
