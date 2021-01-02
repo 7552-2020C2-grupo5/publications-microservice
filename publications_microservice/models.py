@@ -35,6 +35,7 @@ class Publication(db.Model):  # type: ignore
 
     images = db.relationship("PublicationImage", backref="publication", lazy=True)
     questions = db.relationship("PublicationQuestion", backref="publication", lazy=True)
+    stars = db.relationship("PublicationStar", backref="publication", lazy=True)
 
     def update_from_dict(self, **kwargs):
         for field, value in kwargs.items():
@@ -64,4 +65,15 @@ class PublicationQuestion(db.Model):  # type: ignore
     user_id = db.Column(db.Integer, nullable=False)
     publication_id = db.Column(
         db.Integer, db.ForeignKey('publication.id'), nullable=False
+    )
+
+
+class PublicationStar(db.Model):  # type: ignore
+    """Publication stars."""
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, nulable=False)
+    created_at = db.Column(db.DateTime, nullable=False, default=func.now())
+    publication_id = db.Column(
+        db.Integer, db.ForeignKey('publication_id'), nullable=False
     )
