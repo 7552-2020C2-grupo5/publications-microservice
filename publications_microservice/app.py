@@ -29,6 +29,7 @@ def create_app():
         default="sqlite:///publications_microservice.db", cast=fix_dialect
     )
     new_app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    new_app.config["ERROR_404_HELP"] = False
     db.init_app(new_app)
     api.init_app(new_app)
     Migrate(new_app, db, directory=Path(__file__).parent / "migrations")
