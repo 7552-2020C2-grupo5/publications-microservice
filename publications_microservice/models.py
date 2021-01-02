@@ -72,8 +72,8 @@ class PublicationStar(db.Model):  # type: ignore
     """Publication stars."""
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, nulable=False)
+    user_id = db.Column(db.Integer, nullable=False)
     created_at = db.Column(db.DateTime, nullable=False, default=func.now())
     publication_id = db.Column(
-        db.Integer, db.ForeignKey('publication_id'), nullable=False
+        db.Integer, db.ForeignKey('publication.id'), nullable=False
     )
