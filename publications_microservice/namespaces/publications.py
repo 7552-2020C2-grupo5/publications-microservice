@@ -258,9 +258,21 @@ class PublicationResource(Resource):
             return {"message": "No publication was found by that id."}, 404
         if publication.blocked:
             raise BlockedPublication
+
         data = api.payload
         # TODO: it'd be cool to marshal this on the model
         data['loc'] = f"POINT({data['loc']['latitude']} {data['loc']['longitude']})"
+
+        for image in publication.images:
+            db.session.delete(image)
+
+        images = []
+        for img_data in data["images"]:
+            new_img = PublicationImage(**img_data)
+            images.append(new_img)
+            db.session.add(new_img)
+        data["images"] = images
+
         publication.update_from_dict(**data)
         db.session.merge(publication)
         db.session.commit()
