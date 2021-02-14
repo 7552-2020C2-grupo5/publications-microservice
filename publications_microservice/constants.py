@@ -3,8 +3,8 @@ from enum import Enum
 
 
 class BlockChainStatus(Enum):
+    UNSET = "UNSET"
     CONFIRMED = "CONFIRMED"
     DENIED = "DENIED"
     PENDING = "PENDING"
-    UNSET = "UNSET"
     ERROR = "ERROR"
