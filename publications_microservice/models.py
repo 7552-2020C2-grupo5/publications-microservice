@@ -35,9 +35,7 @@ class Publication(db.Model):  # type: ignore
     publication_date = db.Column(db.DateTime, nullable=False, default=func.now())
     blocked = db.Column(db.Boolean, default=False)
     blockchain_status = db.Column(
-        db.Enum(BlockChainStatus),
-        nullable=False,
-        default=BlockChainStatus.PENDING.value,
+        db.Enum(BlockChainStatus), nullable=False, default=BlockChainStatus.UNSET.value,
     )
     blockchain_transaction_hash = db.Column(db.String(512), nullable=True)
     blockchain_id = db.Column(db.Integer, nullable=True)
