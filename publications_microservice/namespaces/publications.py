@@ -109,13 +109,6 @@ base_publication_model = api.model(
             required=True,
             description="List of images URLs",
         ),
-        "blockchain_status": fields.String(
-            required=True,
-            description="The status on the blockchain",
-            enum=[x.value for x in BlockChainStatus],
-            default=BlockChainStatus.UNSET.value,
-            attribute='blockchain_status.value',
-        ),
     },
 )
 
@@ -158,6 +151,13 @@ publication_model = api.inherit(
         "questions": fields.List(
             fields.Nested(publication_question_model),
             description="Questions regarding the publication",
+        ),
+        "blockchain_status": fields.String(
+            required=False,
+            description="The status on the blockchain",
+            enum=[x.value for x in BlockChainStatus],
+            default=BlockChainStatus.UNSET.value,
+            attribute='blockchain_status.value',
         ),
         "blockchain_id": fields.Integer(description="The id on the blockchain"),
         "blockchain_transaction_hash": fields.String(
