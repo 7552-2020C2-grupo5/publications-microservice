@@ -141,6 +141,20 @@ publication_patch_model = api.model(
     },
 )
 
+new_star_model = api.model(
+    "Starred publication",
+    {
+        "user_id": fields.Integer(
+            description="The unique identifier for the user starring the publication"
+        ),
+        "created_at": fields.DateTime(
+            description="Time when the publication was starred"
+        ),
+        "publication_id": fields.Integer(
+            description="The unique identifier for the publication being starred"
+        ),
+    },
+)
 
 publication_model = api.inherit(
     'Created Publication',
@@ -162,6 +176,9 @@ publication_model = api.inherit(
         "blockchain_id": fields.Integer(description="The id on the blockchain"),
         "blockchain_transaction_hash": fields.String(
             description="The hash of the transaction on the blockchain"
+        ),
+        "stars": fields.List(
+            fields.Nested(new_star_model), description="Stars given to the publication"
         ),
     },
 )
@@ -208,6 +225,12 @@ publication_parser.add_argument(
     type=FilterParam("blockchain_status", ops.eq, schema=str),
     help="blockchain_status",
     default=BlockChainStatus.CONFIRMED.value,
+)
+publication_parser.add_argument(
+    "starring_user_id",
+    type=FilterParam("starring_user_id", ops.eq, attribute="stars.user_id"),
+    help="Id of starring user",
+    store_missing=False,
 )
 publication_parser.add_argument(
     "latitude",
@@ -264,6 +287,7 @@ class PublicationsResource(Resource):
 
         if any((has_lat, has_lon, has_dist)) and not all((has_lat, has_lon, has_dist)):
             raise DistanceFilterMissingParameters
+
         query = Publication.query.filter(Publication.blocked == False)  # noqa: E712
         for _, filter_op in params.items():
             if not isinstance(filter_op, FilterParam):
@@ -360,21 +384,6 @@ class PublicationResource(Resource):
         db.session.commit()
         return {"message": "Publication was successfully blocked"}, 200
 
-
-new_star_model = api.model(
-    "Starred publication",
-    {
-        "user_id": fields.Integer(
-            description="The unique identifier for the user starring the publication"
-        ),
-        "created_at": fields.DateTime(
-            description="Time when the publication was starred"
-        ),
-        "publication_id": fields.Integer(
-            description="The unique identifier for the publication being starred"
-        ),
-    },
-)
 
 publication_star_parser = reqparse.RequestParser()
 publication_star_parser.add_argument(

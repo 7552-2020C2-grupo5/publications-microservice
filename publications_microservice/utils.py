@@ -27,6 +27,14 @@ class FilterParam:
         return self
 
     def apply(self, query, model):
+        if "." in self.attribute:
+            child_class, child_attr = self.attribute.split(".")
+            child_class_ = model.__mapper__.relationships[child_class].mapper.class_
+            return query.filter(
+                getattr(model, child_class).any(
+                    self.op(getattr(child_class_, child_attr), self.val)
+                )
+            )
         return query.filter(self.op(getattr(model, self.attribute), self.val))
 
     def __repr__(self):
