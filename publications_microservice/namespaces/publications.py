@@ -210,6 +210,12 @@ publication_parser.add_argument(
     default=BlockChainStatus.CONFIRMED.value,
 )
 publication_parser.add_argument(
+    "blockchain_transaction_hash",
+    type=FilterParam("blockchain_transaction_hash", ops.eq, schema=str),
+    help="The hash of the transaction that created the publication on the blockchain",
+    store_missing=False,
+)
+publication_parser.add_argument(
     "latitude",
     type=float,
     help="The latitude for the point near to look for. Note: max_distance and longitude are required when using latitude.",
