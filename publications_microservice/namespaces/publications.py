@@ -5,6 +5,7 @@ from flask_restx import Namespace, Resource, fields, reqparse
 from sqlalchemy import func
 
 from publications_microservice import __version__
+from publications_microservice.constants import BlockChainStatus
 from publications_microservice.exceptions import (
     BlockedPublication,
     DistanceFilterMissingParameters,
@@ -121,6 +122,25 @@ new_publication_model = api.inherit(
     },
 )
 
+publication_patch_model = api.model(
+    'Publication patch model',
+    {
+        "blockchain_status": fields.String(
+            required=False,
+            description="The status on the blockchain",
+            enum=[x.value for x in BlockChainStatus],
+            default=BlockChainStatus.UNSET.value,
+            attribute='blockchain_status.value',
+        ),
+        "blockchain_transaction_hash": fields.String(
+            required=False, description="The hash of the transaction on the blockchain"
+        ),
+        "blockchain_id": fields.Integer(
+            required=False, description="The id on the blockchain"
+        ),
+    },
+)
+
 
 publication_model = api.inherit(
     'Created Publication',
@@ -131,6 +151,17 @@ publication_model = api.inherit(
         "questions": fields.List(
             fields.Nested(publication_question_model),
             description="Questions regarding the publication",
+        ),
+        "blockchain_status": fields.String(
+            required=False,
+            description="The status on the blockchain",
+            enum=[x.value for x in BlockChainStatus],
+            default=BlockChainStatus.UNSET.value,
+            attribute='blockchain_status.value',
+        ),
+        "blockchain_id": fields.Integer(description="The id on the blockchain"),
+        "blockchain_transaction_hash": fields.String(
+            description="The hash of the transaction on the blockchain"
         ),
     },
 )
@@ -170,6 +201,18 @@ publication_parser.add_argument(
     "user_id",
     type=FilterParam("user_id", ops.eq),
     help="id of owner user",
+    store_missing=False,
+)
+publication_parser.add_argument(
+    "blockchain_status",
+    type=FilterParam("blockchain_status", ops.eq, schema=str),
+    help="blockchain_status",
+    default=BlockChainStatus.CONFIRMED.value,
+)
+publication_parser.add_argument(
+    "blockchain_transaction_hash",
+    type=FilterParam("blockchain_transaction_hash", ops.eq, schema=str),
+    help="The hash of the transaction that created the publication on the blockchain",
     store_missing=False,
 )
 publication_parser.add_argument(
@@ -284,6 +327,25 @@ class PublicationResource(Resource):
             images.append(new_img)
             db.session.add(new_img)
         data["images"] = images
+
+        publication.update_from_dict(**data)
+        db.session.merge(publication)
+        db.session.commit()
+        return api.marshal(publication, publication_model), 200
+
+    @api.doc("patch_publication")
+    @api.response(200, "Publication found", model=publication_model)
+    @api.response(404, 'Publication not found')
+    @api.expect(publication_patch_model)
+    def patch(self, publication_id):
+        """Replace a publication by id."""
+        publication = Publication.query.filter(Publication.id == publication_id).first()
+        if publication is None:
+            raise PublicationDoesNotExist
+        if publication.blocked:
+            raise BlockedPublication
+
+        data = api.payload
 
         publication.update_from_dict(**data)
         db.session.merge(publication)
