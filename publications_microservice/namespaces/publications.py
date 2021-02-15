@@ -204,13 +204,17 @@ publication_parser.add_argument(
 )
 publication_parser.add_argument(
     "price_per_night_min",
-    type=FilterParam("price_per_night_min", ops.ge, attribute="price_per_night"),
+    type=FilterParam(
+        "price_per_night_min", ops.ge, attribute="price_per_night", schema="number"
+    ),
     help="min price per night",
     store_missing=False,
 )
 publication_parser.add_argument(
     "price_per_night_max",
-    type=FilterParam("price_per_night_max", ops.le, attribute="price_per_night"),
+    type=FilterParam(
+        "price_per_night_max", ops.le, attribute="price_per_night", schema="number"
+    ),
     help="max price per night",
     store_missing=False,
 )
