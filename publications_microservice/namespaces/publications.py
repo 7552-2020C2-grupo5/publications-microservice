@@ -230,13 +230,13 @@ publication_parser.add_argument(
     "starring_user_id",
     type=FilterParam("starring_user_id", ops.eq, attribute="stars.user_id"),
     help="Id of starring user",
-    store_missing=False
+    store_missing=False,
 )
 publication_parser.add_argument(
     "blockchain_transaction_hash",
     type=FilterParam("blockchain_transaction_hash", ops.eq, schema=str),
     help="The hash of the transaction that created the publication on the blockchain",
-    store_missing=False
+    store_missing=False,
 )
 publication_parser.add_argument(
     "latitude",
