@@ -26,18 +26,18 @@ def room_zero():
     }
 
 
-def test_root(client):  # pylint:disable=redefined-outer-name
+def test_root(client):
     response = client.get("/")
     data = response.data
     assert data is not None
     assert 200 == response._status_code
 
 
-def test_post(client, room_zero):  # pylint:disable=redefined-outer-name
+def test_post(client, room_zero):
     response = client.post("/v1/publications", json=room_zero)
     assert 200 == response._status_code
 
 
-def test_post_wo_prefix(client, room_zero):  # pylint:disable=redefined-outer-name
+def test_post_wo_prefix(client, room_zero):
     response = client.post("/publications", json=room_zero)
     assert 404 == response._status_code
