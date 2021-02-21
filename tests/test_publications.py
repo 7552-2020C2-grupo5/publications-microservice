@@ -12,8 +12,7 @@ logger = logging.getLogger(__name__)
 
 @pytest.fixture
 def client():
-    app = create_app()
-    with app.test_client() as test_client:
+    with create_app().test_client() as test_client:
         yield test_client
 
 
