@@ -4,16 +4,30 @@ import logging
 
 # pylint:disable=redefined-outer-name,protected-access
 import pytest
+import testing.postgresql
 
 from publications_microservice.app import create_app
+from publications_microservice.models import db
 
 logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
 def client():
-    with create_app().test_client() as test_client:
-        yield test_client
+    with testing.postgresql.Postgresql() as pgsql:
+        app = create_app(test_db=pgsql.url())
+        with app.app_context():
+            from flask_migrate import upgrade as _upgrade
+
+            db.session.execute("CREATE EXTENSION postgis")
+            db.session.execute("CREATE EXTENSION postgis_topology")
+
+            db.session.commit()
+
+            _upgrade()
+
+        with app.test_client() as test_client:
+            yield test_client
 
 
 @pytest.fixture
