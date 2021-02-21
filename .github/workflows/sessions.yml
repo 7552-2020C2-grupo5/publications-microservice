@@ -12,6 +12,7 @@ jobs:
         python-version: 3.7
     - name: Install dependencies
       run: pip install nox
+    - name: Install postgresql
       run: apt-get install postgresql-12
     - name: Run cop session
       run: nox --sessions cop
