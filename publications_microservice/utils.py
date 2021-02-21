@@ -4,7 +4,17 @@
 class FilterParam:
     """Filter a query based on an op and param"""
 
-    def __init__(self, name, op, _in="query", schema="int", attribute=None):
+    def __init__(
+        self,
+        name,
+        op,
+        _in="query",
+        schema="int",
+        transform=None,
+        format_=None,
+        attribute=None,
+        default=None,
+    ):
         """Filter by operation.
 
         Parameters
@@ -13,17 +23,27 @@ class FilterParam:
         op: Operation to filter with.
         _in: Where the parameter is located.
         schema: The type for swagger documentation.
+        transform: Pre-transform val.
+        format_: Format for swagger.
         attribute: If none, uses name. The attribute to filter on.
+        default: Default value.
         """
 
         self.name = name
         self.op = op
         self.val = None
         self.attribute = attribute or self.name
-        self.__schema__ = {"name": name, "in": _in, "type": schema}
+        self.__schema__ = {"name": name, "in": _in, "type": schema, "format": format_}
+        self.transform = transform
+        self.default = default
 
-    def __call__(self, val):
-        self.val = val
+    def identity(self, x):
+        return x
+
+    def __call__(self, val=None):
+        if not self.default and not val:
+            raise ValueError("Should provide val or default value")
+        self.val = (self.transform or self.identity)(val or self.default)
         return self
 
     def apply(self, query, model):
