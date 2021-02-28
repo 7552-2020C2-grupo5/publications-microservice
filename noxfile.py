@@ -9,7 +9,7 @@ def tests(session):
     session.install("poetry")
     session.run("poetry", "install", "-E", "testing")
 
-    cmd = ["poetry", "run", "pytest", "-n", "auto"]
+    cmd = ["poetry", "run", "pytest", "-n", "1"]
 
     if session.posargs:
         cmd.extend(session.posargs)
