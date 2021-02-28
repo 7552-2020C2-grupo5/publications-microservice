@@ -4,7 +4,6 @@ import logging
 
 # pylint:disable=redefined-outer-name,protected-access
 import pytest
-import testing.postgresql
 
 from publications_microservice.app import create_app
 from publications_microservice.models import db
@@ -14,20 +13,13 @@ logger = logging.getLogger(__name__)
 
 @pytest.fixture
 def client():
-    with testing.postgresql.Postgresql() as pgsql:
-        app = create_app(test_db=pgsql.url())
-        with app.app_context():
-            from flask_migrate import upgrade as _upgrade
-
-            db.session.execute("CREATE EXTENSION postgis")
-            db.session.execute("CREATE EXTENSION postgis_topology")
-
-            db.session.commit()
-
-            _upgrade()
-
-        with app.test_client() as test_client:
-            yield test_client
+    app = create_app()
+    with app.app_context():
+        db.create_all()
+    with app.test_client() as test_client:
+        yield test_client
+    with app.app_context():
+        db.drop_all()
 
 
 @pytest.fixture
@@ -56,6 +48,17 @@ def test_post(client, room_zero):
     response = client.post("/v1/publications", json=room_zero)
     assert 200 == response._status_code
     assert len(json.loads(response.data)) >= 1
+
+
+def test_loc_search(client, room_zero):
+    response = client.post("/v1/publications", json=room_zero)
+    assert response._status_code == 200
+    response = client.get(
+        "/v1/publications",
+        json={"latitude": 0.1, "longitude": 0.1, "max_distance": 15.7},
+    )
+    assert response._status_code == 200
+    assert len(json.loads(response.data)) == 1
 
 
 def test_post_wo_prefix(client, room_zero):
