@@ -552,17 +552,6 @@ optional = false
 python-versions = ">=2.6"
 
 [[package]]
-name = "pg8000"
-version = "1.17.0"
-description = "PostgreSQL interface library"
-category = "main"
-optional = false
-python-versions = ">=3.5"
-
-[package.dependencies]
-scramp = "1.2.0"
-
-[[package]]
 name = "pluggy"
 version = "0.13.1"
 description = "plugin and hook calling mechanisms for python"
@@ -803,14 +792,6 @@ optional = false
 python-versions = "*"
 
 [[package]]
-name = "scramp"
-version = "1.2.0"
-description = "An implementation of the SCRAM protocol."
-category = "main"
-optional = false
-python-versions = ">=3.5"
-
-[[package]]
 name = "shapely"
 version = "1.7.1"
 description = "Geometric objects, predicates, and operations"
@@ -897,32 +878,6 @@ python-versions = ">=3.6"
 [package.dependencies]
 importlib-metadata = {version = ">=1.7.0", markers = "python_version < \"3.8\""}
 pbr = ">=2.0.0,<2.1.0 || >2.1.0"
-
-[[package]]
-name = "testing.common.database"
-version = "2.0.3"
-description = "utilities for testing.* packages"
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.extras]
-testing = ["nose"]
-
-[[package]]
-name = "testing.postgresql"
-version = "1.3.0"
-description = "automatically setups a postgresql instance in a temporary directory, and destroys it after testing"
-category = "main"
-optional = false
-python-versions = "*"
-
-[package.dependencies]
-pg8000 = ">=1.10"
-"testing.common.database" = "*"
-
-[package.extras]
-testing = ["sqlalchemy", "nose", "psycopg2"]
 
 [[package]]
 name = "toml"
@@ -1017,7 +972,7 @@ testing = ["pytest", "pytest-cov", "pytest-xdist"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.7"
-content-hash = "5c3fb4aa33bf58aee28f94cb582041fddef44e9188ef98f97e20eff5e1286fa8"
+content-hash = "9971df1a6a1bc68d6996a84224b5c4f73f9f2f7253fb9f6ae03f759a675071c4"
 
 [metadata.files]
 alembic = [
@@ -1303,10 +1258,6 @@ pbr = [
     {file = "pbr-5.5.1-py2.py3-none-any.whl", hash = "sha256:b236cde0ac9a6aedd5e3c34517b423cd4fd97ef723849da6b0d2231142d89c00"},
     {file = "pbr-5.5.1.tar.gz", hash = "sha256:5fad80b613c402d5b7df7bd84812548b2a61e9977387a80a5fc5c396492b13c9"},
 ]
-pg8000 = [
-    {file = "pg8000-1.17.0-py3-none-any.whl", hash = "sha256:3276fe9cf38fee4fd4006c64d50fa621841b550f0f068d88b4694ee423188a5f"},
-    {file = "pg8000-1.17.0.tar.gz", hash = "sha256:14198c5afeb289106e40ee6e5e4c0529c5369939f6ca588a028b371a75fe20dd"},
-]
 pluggy = [
     {file = "pluggy-0.13.1-py2.py3-none-any.whl", hash = "sha256:966c145cd83c96502c3c3868f50408687b38434af77734af1e9ca461a4081d2d"},
     {file = "pluggy-0.13.1.tar.gz", hash = "sha256:15b2acde666561e1298d71b523007ed7364de07029219b604cf808bfa1c765b0"},
@@ -1471,10 +1422,6 @@ regex = [
     {file = "regex-2020.11.13-cp39-cp39-win_amd64.whl", hash = "sha256:a15f64ae3a027b64496a71ab1f722355e570c3fac5ba2801cafce846bf5af01d"},
     {file = "regex-2020.11.13.tar.gz", hash = "sha256:83d6b356e116ca119db8e7c6fc2983289d87b27b3fac238cfe5dca529d884562"},
 ]
-scramp = [
-    {file = "scramp-1.2.0-py3-none-any.whl", hash = "sha256:74815c25aad1fe0b5fb994e96c3de63e8695164358a80138352aaadfa4760350"},
-    {file = "scramp-1.2.0.tar.gz", hash = "sha256:d6865ed1d135ddb124a619d7cd3a5b505f69a7c92e248024dd7e48bc77752af5"},
-]
 shapely = [
     {file = "Shapely-1.7.1-cp27-cp27mu-manylinux1_x86_64.whl", hash = "sha256:4c10f317e379cc404f8fc510cd9982d5d3e7ba13a9cfd39aa251d894c6366798"},
     {file = "Shapely-1.7.1-cp35-cp35m-macosx_10_6_intel.whl", hash = "sha256:17df66e87d0fe0193910aeaa938c99f0b04f67b430edb8adae01e7be557b141b"},
@@ -1549,14 +1496,6 @@ sqlalchemy-utils = [
 stevedore = [
     {file = "stevedore-3.3.0-py3-none-any.whl", hash = "sha256:50d7b78fbaf0d04cd62411188fa7eedcb03eb7f4c4b37005615ceebe582aa82a"},
     {file = "stevedore-3.3.0.tar.gz", hash = "sha256:3a5bbd0652bf552748871eaa73a4a8dc2899786bc497a2aa1fcb4dcdb0debeee"},
-]
-"testing.common.database" = [
-    {file = "testing.common.database-2.0.3-py2.py3-none-any.whl", hash = "sha256:e3ed492bf480a87f271f74c53b262caf5d85c8bc09989a8f534fa2283ec52492"},
-    {file = "testing.common.database-2.0.3.tar.gz", hash = "sha256:965d80b2985315325dc358c3061b174a712f4d4d5bf6a80b58b11f9a1dd86d73"},
-]
-"testing.postgresql" = [
-    {file = "testing.postgresql-1.3.0-py2.py3-none-any.whl", hash = "sha256:1b41daeb98dfc8cd4a584bb91e8f5f4ab182993870f95257afe5f1ba6151a598"},
-    {file = "testing.postgresql-1.3.0.tar.gz", hash = "sha256:8e1a69760369a7a8ffe63a66b6d95a5cd82db2fb976e4a8f85ffd24fbfc447d8"},
 ]
 toml = [
     {file = "toml-0.10.2-py2.py3-none-any.whl", hash = "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b"},
