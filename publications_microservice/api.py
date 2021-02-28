@@ -25,5 +25,5 @@ api.add_namespace(questions_namespace, path='/publications')
 @api.errorhandler
 def handle_exception(error: Exception):
     """When an unhandled exception is raised"""
-    message = "Error: " + getattr(error, 'message', str(error))
-    return {'message': message}, getattr(error, 'code', 500)
+    message = f"Error: {getattr(error, 'message', str(error))}"
+    return {"message": message}, getattr(error, 'code', 500)

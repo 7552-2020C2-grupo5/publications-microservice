@@ -57,7 +57,9 @@ nox
 
 To run tests session,
 ```bash
-nox --sessions tests [-- pylint arguments]
+podman run --rm -d -e POSTGRES_USER=publications -e POSTGRES=publications -e POSTGRES_DB=publications_tests -e POSTGRES_PASSWORD=publications -p 54321:5432 --name postgis_tests postgis/postgis:11-2.5-alpine
+DATABASE_URL=postgres://publications:publications@localhost:54321/publications_tests nox --sessions tests [-- pylint arguments]
+podman stop postgis_tests
 ```
 
 To run linting session,
@@ -160,4 +162,3 @@ You can visit the swagger docs at `127.0.0.1:5000`.
 
 ## Whole project class diagram
 ![project_classes](docs/images/project_classes.png)
-
