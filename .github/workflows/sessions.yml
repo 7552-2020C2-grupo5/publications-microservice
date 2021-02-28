@@ -39,7 +39,7 @@ jobs:
     - name: Run tests session
       run: nox --sessions tests -- -n1
       env:
-        DATABASE_URL: postgres://postgres:postgres@postgres:${{ job.services.postgres.ports[5432] }}/tests
+        DATABASE_URL: postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/tests
   bandit:
     runs-on: ubuntu-latest
     steps:
