@@ -25,7 +25,7 @@ jobs:
     - name: Install dependencies
       run: pip install nox
     - name: Install postgresql
-      run: sudo apt-get install postgresql-12 postgis postgresql-12-postgis-3
+      run: sudo apt-get install postgresql-12 postgis postgresql-12-postgis-3 postgresql-12-postgis-scripts
     - name: Run tests session
       run: nox --sessions tests
   bandit:
