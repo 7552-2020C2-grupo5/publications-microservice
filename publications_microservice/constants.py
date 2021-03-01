@@ -4,6 +4,7 @@ from enum import Enum
 DEFAULT_VERIFICATION_URL = (
     "https://tokens-microservice.herokuapp.com/v1/tokens/verification"
 )
+BOOKBNB_TOKEN = "bookbnb_token"
 
 
 class BlockChainStatus(Enum):
