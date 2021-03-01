@@ -7,6 +7,7 @@ from publications_microservice.namespaces.publications import (
     api as publications_namespace,
 )
 from publications_microservice.namespaces.questions import api as questions_namespace
+from publications_microservice.namespaces.token import api as token_namespace
 
 api = Api(
     prefix="/v1",
@@ -20,6 +21,7 @@ api = Api(
 
 api.add_namespace(publications_namespace, path='/publications')
 api.add_namespace(questions_namespace, path='/publications')
+api.add_namespace(token_namespace, path='/token')
 
 
 @api.errorhandler
