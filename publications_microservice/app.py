@@ -42,7 +42,7 @@ def before_request():
     ):
         return
 
-    bookbnb_token = request.headers.get("BookBNB-Authorization")
+    bookbnb_token = request.headers.get("BookBNBAuthorization")
     if bookbnb_token is None:
         return {"message": "BookBNB token is missing"}, 401
 
