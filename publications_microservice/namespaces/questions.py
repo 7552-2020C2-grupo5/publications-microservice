@@ -15,7 +15,7 @@ api = Namespace("Questions", description="Publication questions operations")
 
 
 @api.errorhandler(BlockedPublication)
-def handle_blocked_publication(_exception):
+def handle_blocked_publication_questions(_exception):
     """Handle blocked publication exception."""
     return {'message': "Publication is blocked"}, 400
 

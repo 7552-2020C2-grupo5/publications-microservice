@@ -55,10 +55,15 @@ class FilterParam:
                     self.op(getattr(child_class_, child_attr), self.val)
                 )
             )
-        return query.filter(self.op(getattr(model, self.attribute), self.val))
+        try:
+            return query.filter(self.op(getattr(model, self.attribute), self.val))
+        except NotImplementedError:  # hack for contains
+            return query.filter(
+                getattr(getattr(model, self.attribute), self.op.__name__)(self.val)
+            )
 
     def __repr__(self):
-        return f"filter {self.name} by {self.op}"
+        return f"filter {self.name} by {self.op} (val: {self.val})"
 
     def __str__(self):
         return self.__repr__()

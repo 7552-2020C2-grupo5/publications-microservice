@@ -34,23 +34,18 @@ def handle_missing_distance_parameters(_error: DistanceFilterMissingParameters):
     )
 
 
-@api.errorhandler(BlockedPublication)
-def handle_publication_has_been_blocked(_error: BlockedPublication):
-    """Handle blocked user."""
-    return {"message": "The publication has been blocked"}, 403
+# https://github.com/python-restx/flask-restx/issues/268
+# https://github.com/noirbizarre/flask-restplus/issues/707
+# @api.errorhandler(BlockedPublication)
+# def handle_publication_has_been_blocked(_error: BlockedPublication):
+#    """Handle blocked user."""
+#    return {"message": "The publication has been blocked"}, 403
 
 
 @api.errorhandler(PublicationDoesNotExist)
 def handle_publication_does_not_exist(_error: PublicationDoesNotExist):
     """Handle non-existing publication exception."""
     return {'message': "No publication by that id was found."}, 404
-
-
-@api.errorhandler
-def handle_exception(error: Exception):
-    """When an unhandled exception is raised"""
-    message = f"Error: {getattr(error, 'message', str(error))}"
-    return {"message": message}, getattr(error, 'code', 500)
 
 
 publication_image_model = api.model(
@@ -162,6 +157,7 @@ publication_model = api.inherit(
     {
         "loc": fields.Nested(point_model),
         "publication_date": fields.DateTime(description="Date of the publication"),
+        "blocked": fields.Boolean(description="Is blocked?"),
         "questions": fields.List(
             fields.Nested(publication_question_model),
             description="Questions regarding the publication",
@@ -262,6 +258,27 @@ publication_parser.add_argument(
 )
 
 
+def conditional_filter(attr, val):
+    if val == True:  # noqa: E712
+        return attr == False  # noqa: E712
+    else:
+        return 1 == 1
+
+
+publication_parser.add_argument(
+    "filter_blocked",
+    type=FilterParam(
+        "filter_blocked",
+        conditional_filter,
+        attribute="blocked",
+        schema=bool,
+        transform={"true": True, "false": False}.get,
+    ),
+    store_missing=True,
+    default="true",
+)
+
+
 @api.route('')
 class PublicationsResource(Resource):
     @api.doc('create_publication')
@@ -298,11 +315,21 @@ class PublicationsResource(Resource):
         if any((has_lat, has_lon, has_dist)) and not all((has_lat, has_lon, has_dist)):
             raise DistanceFilterMissingParameters
 
-        query = Publication.query.filter(Publication.blocked == False)  # noqa: E712
-        for _, filter_op in params.items():
+        query = Publication.query  # noqa: E712
+
+        for filter_name, filter_op in params.items():
+            print(f"filter_name: {filter_name}, filter_op: {filter_op}")
             if not isinstance(filter_op, FilterParam):
-                continue
+                print("filter ", filter_name, " is not magic, and op is ", filter_op)
+                if filter_op is None:
+                    continue
+                for i in publication_parser.args:
+                    if i.name == filter_name:
+                        filter_op = i.type(filter_op)
+                        break
+
             query = filter_op.apply(query, Publication)
+
         if params.max_distance:
             point = func.ST_GeographyFromText(
                 f"POINT({params.latitude} {params.longitude})", srid=4326
@@ -321,17 +348,19 @@ class PublicationResource(Resource):
     @api.doc('get_publication')
     @api.response(200, "Publication found", model=publication_model)
     @api.response(404, 'Publication not found')
+    @api.response(403, "Publication blocked")
     def get(self, publication_id):
         """Get a publication by id."""
         publication = Publication.query.filter(Publication.id == publication_id).first()
         if publication is None:
             raise PublicationDoesNotExist
         if publication.blocked:
-            raise BlockedPublication
+            return {"message": "Publication is blocked"}, 403
         return api.marshal(publication, publication_model), 200
 
     @api.doc("put_publication")
     @api.response(200, "Publication found", model=publication_model)
+    @api.response(403, "Publication blocked")
     @api.response(404, 'Publication not found')
     @api.expect(new_publication_model)
     def put(self, publication_id):
@@ -340,7 +369,7 @@ class PublicationResource(Resource):
         if publication is None:
             raise PublicationDoesNotExist
         if publication.blocked:
-            raise BlockedPublication
+            return {"message": "Publication is blocked"}, 403
 
         data = api.payload
         # TODO: it'd be cool to marshal this on the model
