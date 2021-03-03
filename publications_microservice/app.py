@@ -49,7 +49,7 @@ def before_request():
     r = requests.post(
         config.token_verification_url(default=DEFAULT_VERIFICATION_URL),
         json={"token": bookbnb_token},
-        headers={"BookBNB_Authorization": config.bookbnb_token()},
+        headers={"BookBNBAuthorization": config.bookbnb_token()},
     )
 
     if not r.ok:
