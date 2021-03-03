@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "publications_microservice"
-version = "3.1.2"
+version = "3.2.0"
 description = "Publications microservice for BookBNB."
 authors = ["75.52 - 2020C2 - G5 <imermet@fi.uba.ar>"]
 

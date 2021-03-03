@@ -3,6 +3,7 @@
 from flask_restx import Api
 
 from publications_microservice import __version__
+from publications_microservice.namespaces.metrics import api as metrics_namespace
 from publications_microservice.namespaces.publications import (
     api as publications_namespace,
 )
@@ -22,6 +23,7 @@ api = Api(
 api.add_namespace(publications_namespace, path='/publications')
 api.add_namespace(questions_namespace, path='/publications')
 api.add_namespace(token_namespace, path='/token')
+api.add_namespace(metrics_namespace, path="/metrics")
 
 
 @api.errorhandler
