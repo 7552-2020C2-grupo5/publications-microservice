@@ -322,6 +322,7 @@ class PublicationsResource(Resource):
             if not isinstance(filter_op, FilterParam):
                 print("filter ", filter_name, " is not magic, and op is ", filter_op)
                 if filter_op is None:
+                    print(f"SKIPPING {filter_name}")
                     continue
                 for i in publication_parser.args:
                     if i.name == filter_name:
