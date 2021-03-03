@@ -318,16 +318,16 @@ class PublicationsResource(Resource):
         query = Publication.query  # noqa: E712
 
         for filter_name, filter_op in params.items():
-            print(f"filter_name: {filter_name}, filter_op: {filter_op}")
             if not isinstance(filter_op, FilterParam):
-                print("filter ", filter_name, " is not magic, and op is ", filter_op)
                 if filter_op is None:
-                    print(f"SKIPPING {filter_name}")
                     continue
                 for i in publication_parser.args:
                     if i.name == filter_name:
                         filter_op = i.type(filter_op)
                         break
+
+            if not isinstance(filter_op, FilterParam):
+                continue
 
             query = filter_op.apply(query, Publication)
 
