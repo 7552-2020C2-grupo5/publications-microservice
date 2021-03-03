@@ -34,10 +34,10 @@ def handle_missing_distance_parameters(_error: DistanceFilterMissingParameters):
     )
 
 
-@api.errorhandler(BlockedPublication)
-def handle_publication_has_been_blocked(_error: BlockedPublication):
-    """Handle blocked user."""
-    return {"message": "The publication has been blocked"}, 403
+# @api.errorhandler(BlockedPublication)
+# def handle_publication_has_been_blocked(_error: BlockedPublication):
+#    """Handle blocked user."""
+#    return {"message": "The publication has been blocked"}, 403
 
 
 @api.errorhandler(PublicationDoesNotExist)
@@ -162,6 +162,7 @@ publication_model = api.inherit(
     {
         "loc": fields.Nested(point_model),
         "publication_date": fields.DateTime(description="Date of the publication"),
+        "blocked": fields.Boolean(description="Whether the publications is blocked"),
         "questions": fields.List(
             fields.Nested(publication_question_model),
             description="Questions regarding the publication",
@@ -260,6 +261,12 @@ publication_parser.add_argument(
     help="The maximum distance (in km.) for the point near to look for. Note: latitude and longitude are required when using max_distance.",
     store_missing=True,
 )
+publication_parser.add_argument(
+    "blocked",
+    type=FilterParam("blocked", ops.eq, schema="boolean"),
+    help="Filter by blocked status",
+    store_missing=False,
+)
 
 
 @api.route('')
@@ -298,7 +305,7 @@ class PublicationsResource(Resource):
         if any((has_lat, has_lon, has_dist)) and not all((has_lat, has_lon, has_dist)):
             raise DistanceFilterMissingParameters
 
-        query = Publication.query.filter(Publication.blocked == False)  # noqa: E712
+        query = Publication.query
         for _, filter_op in params.items():
             if not isinstance(filter_op, FilterParam):
                 continue
@@ -326,8 +333,8 @@ class PublicationResource(Resource):
         publication = Publication.query.filter(Publication.id == publication_id).first()
         if publication is None:
             raise PublicationDoesNotExist
-        if publication.blocked:
-            raise BlockedPublication
+        # if publication.blocked:
+        #    raise BlockedPublication
         return api.marshal(publication, publication_model), 200
 
     @api.doc("put_publication")
@@ -339,8 +346,8 @@ class PublicationResource(Resource):
         publication = Publication.query.filter(Publication.id == publication_id).first()
         if publication is None:
             raise PublicationDoesNotExist
-        if publication.blocked:
-            raise BlockedPublication
+        # if publication.blocked:
+        #    raise BlockedPublication
 
         data = api.payload
         # TODO: it'd be cool to marshal this on the model
@@ -370,8 +377,8 @@ class PublicationResource(Resource):
         publication = Publication.query.filter(Publication.id == publication_id).first()
         if publication is None:
             raise PublicationDoesNotExist
-        if publication.blocked:
-            raise BlockedPublication
+        # if publication.blocked:
+        #    raise BlockedPublication
 
         data = api.payload
 
