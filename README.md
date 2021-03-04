@@ -1,5 +1,5 @@
 # publications_microservice
-![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/7552-2020C2-grupo5/publications_microservice?style=flat-square)
+![GitHub tag (latest SemVer)](https://img.shields.io/github/v/tag/7552-2020C2-grupo5/publications_microservice?style=flat-square) ![Coverage](coverage-badge.svg)
 
 Publications microservice for BookBNB.
 
