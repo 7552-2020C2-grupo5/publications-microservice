@@ -39,6 +39,9 @@ def before_request():
         config.env(default="DEV") == "DEV"
         or request.path in excluded_paths
         or request.method == "OPTIONS"
+        or (
+            request.method == "PATCH" and "questions" not in request.path
+        )  # TODO: remove when payments service has server token
     ):
         return
 
